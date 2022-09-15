@@ -1,12 +1,12 @@
 const Products = require('../models/product')
 
 const getAllProductsStatic = async (req, res) => {
-	const allProducts = await Products.find({})
+	const allProducts = await Products.find({}).sort('price')
 	res.status(200).json({allProducts, nbHits: allProducts.length})
 }
 
 const getProductByField = async (req, res) => {
-	const { name, featured, company } = req.query
+	const { name, featured, company, sort } = req.query
 
 	const queryObject = {}
 	
@@ -18,15 +18,20 @@ const getProductByField = async (req, res) => {
 		queryObject.featured = featured === 'true' ? true : false
 	}
 	
-	if (company) {
+	if (company) { 
 		queryObject.company = company
 	}
-	console.log(queryObject)
 
-	const result = await Products.find( queryObject )
+	let result = Products.find(queryObject)
+	if (sort) { 
+		const sortList = sort.split(',').join(' ');
+	result = result.sort(sortList);
+	}
+
+	const products = await result
 	
-	res.status(200).json({result, nbHits: result.length})
-}
+	res.status(200).json({nbHits: products.length, products })
+} 
  
 module.exports = {
 	getProductByField, getAllProductsStatic
