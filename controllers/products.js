@@ -6,7 +6,8 @@ const getAllProductsStatic = async (req, res) => {
 }
 
 const getProductByField = async (req, res) => {
-	const { name, featured, company, sort } = req.query
+	// depending on what property values are passed, we process them
+	const { name, featured, company, sort, fields } = req.query
 
 	const queryObject = {}
 	
@@ -23,10 +24,19 @@ const getProductByField = async (req, res) => {
 	}
 
 	let result = Products.find(queryObject)
+	// sorting results by property or properties
 	if (sort) { 
 		const sortList = sort.split(',').join(' ');
-	result = result.sort(sortList);
+		result = result.sort(sortList);
+	} else {
+		result = result.sort('createdAt')
 	}
+
+	// choose what fields to display as results
+	if (fields) {
+		const fieldsList = fields.split(',').join(' ')
+		result = result.select(fieldsList)
+	} 
 
 	const products = await result
 	
@@ -35,4 +45,4 @@ const getProductByField = async (req, res) => {
  
 module.exports = {
 	getProductByField, getAllProductsStatic
-} 
+}
